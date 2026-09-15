@@ -34,7 +34,7 @@ function Inicio() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-end gap-3 p-5 sm:p-10">
           <span className="w-fit border border-forge/50 bg-forge/10 px-2 py-1 text-xs font-bold tracking-widest text-forge uppercase">
-            Taller propio · Medellín
+            Taller propio · Pereira
           </span>
           <h1 className="font-display text-3xl leading-none font-bold tracking-tight uppercase sm:text-5xl">
             Metal que aguanta,
