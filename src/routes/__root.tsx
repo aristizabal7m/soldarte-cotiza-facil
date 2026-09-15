@@ -77,19 +77,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "SoldArte | Taller de soldadura y arte en metal" },
+      {
+        name: "description",
+        content:
+          "Cotice puertas, rejas, ventanas, escaleras y estructuras metálicas a la medida con SoldArte.",
+      },
+      { name: "author", content: "SoldArte" },
+      { property: "og:title", content: "SoldArte | Taller de soldadura y arte en metal" },
+      {
+        property: "og:description",
+        content: "Cotización automática de construcciones metálicas y venta de herramienta.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Barlow:wght@400;600;700&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
@@ -114,11 +126,40 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+const navCls =
+  "border border-transparent px-3 py-2 text-xs font-bold tracking-widest uppercase text-muted-foreground hover:text-foreground";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
+      <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <Link to="/" className="flex min-w-0 items-center gap-2">
+            <span className="grid h-9 w-9 shrink-0 place-items-center bg-primary font-display text-lg font-bold text-primary-foreground">
+              S
+            </span>
+            <span className="truncate font-display text-xl font-bold tracking-widest uppercase">
+              Sold<span className="text-forge">Arte</span>
+            </span>
+          </Link>
+        </div>
+        <nav className="flex overflow-x-auto border-t border-border px-2">
+          <Link to="/" className={navCls} activeProps={{ className: "text-forge border-b-2 border-forge" }} activeOptions={{ exact: true }}>
+            Inicio
+          </Link>
+          <Link to="/cotizar" className={navCls} activeProps={{ className: "text-forge border-b-2 border-forge" }}>
+            Cotizador
+          </Link>
+          <Link to="/herramientas" className={navCls} activeProps={{ className: "text-forge border-b-2 border-forge" }}>
+            Herramientas
+          </Link>
+          <Link to="/panel" className={navCls} activeProps={{ className: "text-forge border-b-2 border-forge" }}>
+            Panel
+          </Link>
+        </nav>
+      </header>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
