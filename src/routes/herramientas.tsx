@@ -32,7 +32,7 @@ function Herramientas() {
         Herramientas y materiales
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Entrega en obra en Medellín y municipios cercanos.
+        Entrega en obra en Pereira y municipios cercanos.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
