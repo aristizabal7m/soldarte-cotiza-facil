@@ -25,7 +25,7 @@ function Inicio() {
     <div className="pb-14">
       <section className="relative overflow-hidden border-b border-border">
         <img
-          src={servicios[3].foto}
+          src={servicios[3]!.foto}
           alt="Escalera metálica en caracol fabricada por SoldArte"
           width={1024}
           height={768}
