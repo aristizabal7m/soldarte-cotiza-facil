@@ -24,9 +24,15 @@ export const Route = createFileRoute("/panel")({
 const estados: Estado[] = ["Pendiente", "En proceso", "Entregado"];
 
 const colorEstado: Record<Estado, string> = {
-  Pendiente: "border-accent/60 bg-accent/15 text-accent",
-  "En proceso": "border-primary bg-primary/20 text-primary-foreground",
-  Entregado: "border-border bg-secondary text-muted-foreground",
+  Pendiente: "border-estado-pendiente/60 bg-estado-pendiente/15 text-estado-pendiente",
+  "En proceso": "border-estado-proceso/60 bg-estado-proceso/15 text-estado-proceso",
+  Entregado: "border-estado-entregado/60 bg-estado-entregado/15 text-estado-entregado",
+};
+
+const bordeEstado: Record<Estado, string> = {
+  Pendiente: "border-l-estado-pendiente",
+  "En proceso": "border-l-estado-proceso",
+  Entregado: "border-l-estado-entregado",
 };
 
 function Panel() {
@@ -65,51 +71,88 @@ function Panel() {
         ))}
       </div>
 
-      <div className="mt-5 space-y-3">
-        {visibles.map((s) => (
-          <article key={s.id} className="border border-border bg-card p-4">
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-              <div className="min-w-0">
-                <p className="text-xs font-bold tracking-widest uppercase text-muted-foreground">
-                  {s.id} · {s.fecha}
-                </p>
-                <h2 className="truncate font-display text-lg font-bold tracking-wide uppercase">
-                  {s.cliente}
-                </h2>
-                <p className="mt-1 text-sm text-foreground">{s.trabajo}</p>
-                <p className="text-sm text-muted-foreground">
-                  {s.material} · {s.telefono}
-                </p>
-              </div>
-              <span
-                className={`shrink-0 border px-2 py-1 text-xs font-bold tracking-widest uppercase ${colorEstado[s.estado]}`}
+      <div className="mt-5 overflow-x-auto border border-border">
+        <table className="w-full min-w-[720px] border-collapse text-sm">
+          <thead>
+            <tr className="bg-muted/60 text-left">
+              <th className="px-3 py-2.5 text-xs font-bold tracking-widest uppercase text-muted-foreground">
+                Solicitud
+              </th>
+              <th className="px-3 py-2.5 text-xs font-bold tracking-widest uppercase text-muted-foreground">
+                Cliente
+              </th>
+              <th className="px-3 py-2.5 text-xs font-bold tracking-widest uppercase text-muted-foreground">
+                Trabajo
+              </th>
+              <th className="px-3 py-2.5 text-right text-xs font-bold tracking-widest uppercase text-muted-foreground">
+                Precio
+              </th>
+              <th className="px-3 py-2.5 text-xs font-bold tracking-widest uppercase text-muted-foreground">
+                Estado
+              </th>
+              <th className="px-3 py-2.5 text-xs font-bold tracking-widest uppercase text-muted-foreground">
+                Acción
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibles.map((s) => (
+              <tr
+                key={s.id}
+                className={`border-t border-border border-l-4 ${bordeEstado[s.estado]} bg-card align-top`}
               >
-                {s.estado}
-              </span>
-            </div>
-
-            <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border pt-3">
-              <p className="font-display text-2xl font-bold text-forge">{cop(s.precio)}</p>
-              <select
-                aria-label={`Cambiar estado de ${s.id}`}
-                className="shrink-0 border border-border bg-input px-2 py-2 text-sm text-foreground outline-none focus:border-forge"
-                value={s.estado}
-                onChange={(e) => cambiar(s.id, e.target.value as Estado)}
-              >
-                {estados.map((e) => (
-                  <option key={e} value={e}>
-                    {e}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </article>
-        ))}
-        {visibles.length === 0 && (
-          <p className="border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-            No hay solicitudes en este estado.
-          </p>
-        )}
+                <td className="px-3 py-3 whitespace-nowrap text-xs text-muted-foreground">
+                  <span className="font-bold tracking-widest uppercase text-foreground">{s.id}</span>
+                  <br />
+                  {s.fecha}
+                </td>
+                <td className="px-3 py-3">
+                  <span className="font-display font-bold tracking-wide uppercase">
+                    {s.cliente}
+                  </span>
+                  <br />
+                  <span className="text-xs text-muted-foreground">{s.telefono}</span>
+                </td>
+                <td className="px-3 py-3">
+                  {s.trabajo}
+                  <br />
+                  <span className="text-xs text-muted-foreground capitalize">{s.material}</span>
+                </td>
+                <td className="px-3 py-3 text-right font-display text-base font-bold whitespace-nowrap text-forge">
+                  {cop(s.precio)}
+                </td>
+                <td className="px-3 py-3">
+                  <span
+                    className={`inline-block border px-2 py-1 text-xs font-bold tracking-widest whitespace-nowrap uppercase ${colorEstado[s.estado]}`}
+                  >
+                    {s.estado}
+                  </span>
+                </td>
+                <td className="px-3 py-3">
+                  <select
+                    aria-label={`Cambiar estado de ${s.id}`}
+                    className="w-full max-w-36 border border-border bg-input px-2 py-1.5 text-sm text-foreground outline-none focus:border-forge"
+                    value={s.estado}
+                    onChange={(e) => cambiar(s.id, e.target.value as Estado)}
+                  >
+                    {estados.map((e) => (
+                      <option key={e} value={e}>
+                        {e}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+              </tr>
+            ))}
+            {visibles.length === 0 && (
+              <tr>
+                <td colSpan={6} className="bg-card px-3 py-6 text-center text-sm text-muted-foreground">
+                  No hay solicitudes en este estado.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
