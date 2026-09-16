@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   calcularPrecio,
   cop,
@@ -11,6 +11,13 @@ import {
 } from "@/lib/soldarte";
 
 export const Route = createFileRoute("/cotizar")({
+  validateSearch: (search: Record<string, unknown>): { tipo?: TipoTrabajo } => {
+    const tipo = search.tipo;
+    if (typeof tipo === "string" && tiposTrabajo.some((t) => t.id === tipo)) {
+      return { tipo: tipo as TipoTrabajo };
+    }
+    return {};
+  },
   head: () => ({
     meta: [
       { title: "Cotizador de construcciones metálicas | SoldArte" },
