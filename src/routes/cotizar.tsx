@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   calcularPrecio,
   cop,
@@ -11,6 +11,13 @@ import {
 } from "@/lib/soldarte";
 
 export const Route = createFileRoute("/cotizar")({
+  validateSearch: (search: Record<string, unknown>): { tipo?: TipoTrabajo } => {
+    const tipo = search["tipo"];
+    if (typeof tipo === "string" && tiposTrabajo.some((t) => t.id === tipo)) {
+      return { tipo: tipo as TipoTrabajo };
+    }
+    return {};
+  },
   head: () => ({
     meta: [
       { title: "Cotizador de construcciones metálicas | SoldArte" },
@@ -34,7 +41,8 @@ const inputCls =
 const labelCls = "mb-2 block text-xs font-bold tracking-widest uppercase text-muted-foreground";
 
 function Cotizador() {
-  const [tipo, setTipo] = useState<TipoTrabajo>("rejas");
+  const search = Route.useSearch();
+  const [tipo, setTipo] = useState<TipoTrabajo>(search.tipo ?? "rejas");
   const [material, setMaterial] = useState<Material>("hierro");
   const [alto, setAlto] = useState("1.20");
   const [ancho, setAncho] = useState("0.80");
@@ -42,6 +50,10 @@ function Cotizador() {
   const [telefono, setTelefono] = useState("");
   const [precio, setPrecio] = useState<number | null>(null);
   const [enviada, setEnviada] = useState(false);
+
+  useEffect(() => {
+    if (search.tipo) setTipo(search.tipo);
+  }, [search.tipo]);
 
   const nombreTipo = tiposTrabajo.find((t) => t.id === tipo)!.nombre;
   const nombreMaterial = materiales.find((m) => m.id === material)!.nombre;

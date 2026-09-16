@@ -63,9 +63,11 @@ function Inicio() {
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {servicios.map((s) => (
-            <article
+            <Link
               key={s.id}
-              className="overflow-hidden border border-border bg-card transition-colors hover:border-forge/60"
+              to="/cotizar"
+              search={{ tipo: s.id }}
+              className="group overflow-hidden border border-border bg-card transition-colors hover:border-forge/60"
             >
               <img
                 src={s.foto}
@@ -80,9 +82,11 @@ function Inicio() {
                   {s.nombre}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">{s.descripcion}</p>
-                <p className="mt-3 text-sm font-bold text-forge">Desde {cop(s.desde)}</p>
+                <p className="mt-3 text-sm font-bold text-forge group-hover:underline">
+                  Desde {cop(s.desde)} · Cotizar
+                </p>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
 
