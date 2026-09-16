@@ -51,6 +51,10 @@ function Cotizador() {
   const [precio, setPrecio] = useState<number | null>(null);
   const [enviada, setEnviada] = useState(false);
 
+  useEffect(() => {
+    if (search.tipo) setTipo(search.tipo);
+  }, [search.tipo]);
+
   const nombreTipo = tiposTrabajo.find((t) => t.id === tipo)!.nombre;
   const nombreMaterial = materiales.find((m) => m.id === material)!.nombre;
 
