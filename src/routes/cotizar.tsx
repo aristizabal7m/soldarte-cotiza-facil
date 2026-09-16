@@ -12,7 +12,7 @@ import {
 
 export const Route = createFileRoute("/cotizar")({
   validateSearch: (search: Record<string, unknown>): { tipo?: TipoTrabajo } => {
-    const tipo = search.tipo;
+    const tipo = search["tipo"];
     if (typeof tipo === "string" && tiposTrabajo.some((t) => t.id === tipo)) {
       return { tipo: tipo as TipoTrabajo };
     }
@@ -41,7 +41,8 @@ const inputCls =
 const labelCls = "mb-2 block text-xs font-bold tracking-widest uppercase text-muted-foreground";
 
 function Cotizador() {
-  const [tipo, setTipo] = useState<TipoTrabajo>("rejas");
+  const search = Route.useSearch();
+  const [tipo, setTipo] = useState<TipoTrabajo>(search.tipo ?? "rejas");
   const [material, setMaterial] = useState<Material>("hierro");
   const [alto, setAlto] = useState("1.20");
   const [ancho, setAncho] = useState("0.80");
