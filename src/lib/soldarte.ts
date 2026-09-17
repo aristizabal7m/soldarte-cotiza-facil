@@ -92,8 +92,8 @@ export type Solicitud = {
   cliente: string;
   telefono: string;
   trabajo: string;
-  material: string;
-  precio: number;
+  material?: string;
+  precio?: number;
   estado: Estado;
   fecha: string;
 };

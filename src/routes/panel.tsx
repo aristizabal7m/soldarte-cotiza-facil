@@ -115,11 +115,15 @@ function Panel() {
                 </td>
                 <td className="px-3 py-3">
                   {s.trabajo}
-                  <br />
-                  <span className="text-xs text-muted-foreground capitalize">{s.material}</span>
+                  {s.material && (
+                    <>
+                      <br />
+                      <span className="text-xs text-muted-foreground capitalize">{s.material}</span>
+                    </>
+                  )}
                 </td>
                 <td className="px-3 py-3 text-right font-display text-base font-bold whitespace-nowrap text-forge">
-                  {cop(s.precio)}
+                  {typeof s.precio === "number" ? cop(s.precio) : "Por cotizar"}
                 </td>
                 <td className="px-3 py-3">
                   <span
