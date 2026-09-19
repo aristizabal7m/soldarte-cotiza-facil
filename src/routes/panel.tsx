@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { cop, solicitudes as data, type Estado, type Solicitud } from "@/lib/soldarte";
+import {
+  solicitudes as data,
+  tiposTrabajo,
+  type Estado,
+  type Solicitud,
+} from "@/lib/soldarte";
 
 export const Route = createFileRoute("/panel")({
   head: () => ({
@@ -9,7 +14,7 @@ export const Route = createFileRoute("/panel")({
       {
         name: "description",
         content:
-          "Solicitudes de cotización recibidas con cliente, trabajo, precio estimado y estado del pedido.",
+          "Solicitudes de cotización recibidas con tipo de construcción, descripción, datos del cliente y estado del pedido.",
       },
       { property: "og:title", content: "Panel del taller | SoldArte" },
       {
@@ -21,19 +26,20 @@ export const Route = createFileRoute("/panel")({
   component: Panel,
 });
 
-const estados: Estado[] = ["Pendiente", "En proceso", "Entregado"];
+const estados: Estado[] = ["Pendiente", "Atendida"];
 
 const colorEstado: Record<Estado, string> = {
   Pendiente: "border-estado-pendiente/60 bg-estado-pendiente/15 text-estado-pendiente",
-  "En proceso": "border-estado-proceso/60 bg-estado-proceso/15 text-estado-proceso",
-  Entregado: "border-estado-entregado/60 bg-estado-entregado/15 text-estado-entregado",
+  Atendida: "border-estado-entregado/60 bg-estado-entregado/15 text-estado-entregado",
 };
 
 const bordeEstado: Record<Estado, string> = {
   Pendiente: "border-l-estado-pendiente",
-  "En proceso": "border-l-estado-proceso",
-  Entregado: "border-l-estado-entregado",
+  Atendida: "border-l-estado-entregado",
 };
+
+const nombreTipo = (id: Solicitud["tipo"]) =>
+  tiposTrabajo.find((t) => t.id === id)?.nombre ?? id;
 
 function Panel() {
   const [lista, setLista] = useState<Solicitud[]>([...data]);
@@ -52,7 +58,7 @@ function Panel() {
     <div className="p-5 pb-16 sm:p-8">
       <h1 className="font-display text-3xl font-bold tracking-tight uppercase">Panel del taller</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        {lista.length} solicitudes · {pendientes} por responder
+        {lista.length} solicitudes · {pendientes} por atender
       </p>
 
       <div className="mt-5 flex flex-wrap gap-2">
@@ -79,13 +85,13 @@ function Panel() {
                 Solicitud
               </th>
               <th className="px-3 py-2.5 text-xs font-bold tracking-widest uppercase text-muted-foreground">
-                Cliente
+                Tipo
               </th>
               <th className="px-3 py-2.5 text-xs font-bold tracking-widest uppercase text-muted-foreground">
-                Trabajo
+                Descripción
               </th>
-              <th className="px-3 py-2.5 text-right text-xs font-bold tracking-widest uppercase text-muted-foreground">
-                Precio
+              <th className="px-3 py-2.5 text-xs font-bold tracking-widest uppercase text-muted-foreground">
+                Cliente
               </th>
               <th className="px-3 py-2.5 text-xs font-bold tracking-widest uppercase text-muted-foreground">
                 Estado
@@ -106,24 +112,16 @@ function Panel() {
                   <br />
                   {s.fecha}
                 </td>
+                <td className="px-3 py-3 font-display font-bold tracking-wide uppercase">
+                  {nombreTipo(s.tipo)}
+                </td>
+                <td className="px-3 py-3">{s.descripcion}</td>
                 <td className="px-3 py-3">
                   <span className="font-display font-bold tracking-wide uppercase">
                     {s.cliente}
                   </span>
                   <br />
                   <span className="text-xs text-muted-foreground">{s.telefono}</span>
-                </td>
-                <td className="px-3 py-3">
-                  {s.trabajo}
-                  {s.material && (
-                    <>
-                      <br />
-                      <span className="text-xs text-muted-foreground capitalize">{s.material}</span>
-                    </>
-                  )}
-                </td>
-                <td className="px-3 py-3 text-right font-display text-base font-bold whitespace-nowrap text-forge">
-                  {typeof s.precio === "number" ? cop(s.precio) : "Por cotizar"}
                 </td>
                 <td className="px-3 py-3">
                   <span
