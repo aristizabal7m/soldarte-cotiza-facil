@@ -51,11 +51,11 @@ function Cotizador() {
 
   const enviar = (e: React.FormEvent) => {
     e.preventDefault();
-    const nombreTipo = tiposTrabajo.find((t) => t.id === tipo)!.nombre;
     agregarSolicitud({
       cliente: cliente.trim() || "Cliente sin nombre",
       telefono: telefono.trim() || "Sin teléfono",
-      trabajo: descripcion.trim() ? `${nombreTipo} — ${descripcion.trim()}` : nombreTipo,
+      tipo,
+      descripcion: descripcion.trim() || "Sin descripción",
     });
     setEnviada(true);
   };
