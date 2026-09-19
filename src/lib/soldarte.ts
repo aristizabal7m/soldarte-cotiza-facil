@@ -85,15 +85,14 @@ export function calcularPrecio(
   return Math.min(Math.max(precio, 150000), 3500000);
 }
 
-export type Estado = "Pendiente" | "En proceso" | "Entregado";
+export type Estado = "Pendiente" | "Atendida";
 
 export type Solicitud = {
   id: string;
   cliente: string;
   telefono: string;
-  trabajo: string;
-  material?: string;
-  precio?: number;
+  tipo: TipoTrabajo;
+  descripcion: string;
   estado: Estado;
   fecha: string;
 };
@@ -103,19 +102,17 @@ export const solicitudes: Solicitud[] = [
     id: "SA-1042",
     cliente: "Constructora El Roble",
     telefono: "310 482 1176",
-    trabajo: "Estructura metálica para cubierta 6.00m x 4.00m",
-    material: "Hierro",
-    precio: 3450000,
-    estado: "En proceso",
+    tipo: "estructuras",
+    descripcion: "Cubierta para patio 6.00m x 4.00m",
+    estado: "Atendida",
     fecha: "12 sep",
   },
   {
     id: "SA-1041",
     cliente: "Casa de la familia Gómez",
     telefono: "315 774 2093",
-    trabajo: "Reja para ventana 1.20m x 0.80m",
-    material: "Hierro",
-    precio: 320000,
+    tipo: "rejas",
+    descripcion: "Reja para ventana 1.20m x 0.80m",
     estado: "Pendiente",
     fecha: "12 sep",
   },
@@ -123,9 +120,8 @@ export const solicitudes: Solicitud[] = [
     id: "SA-1039",
     cliente: "Panadería La Espiga",
     telefono: "312 209 8845",
-    trabajo: "Puerta metálica enrollable 2.10m x 1.00m",
-    material: "Acero inoxidable",
-    precio: 1780000,
+    tipo: "puertas",
+    descripcion: "Puerta metálica enrollable 2.10m x 1.00m",
     estado: "Pendiente",
     fecha: "11 sep",
   },
@@ -133,37 +129,36 @@ export const solicitudes: Solicitud[] = [
     id: "SA-1036",
     cliente: "Edificio Portal del Norte",
     telefono: "301 556 3320",
-    trabajo: "Escalera metálica caracol",
-    material: "Hierro",
-    precio: 2960000,
-    estado: "En proceso",
+    tipo: "escaleras",
+    descripcion: "Escalera metálica caracol",
+    estado: "Pendiente",
     fecha: "9 sep",
   },
   {
     id: "SA-1031",
     cliente: "Casa de la familia Gómez",
     telefono: "315 774 2093",
-    trabajo: "Baranda de balcón 3.00m x 1.10m",
-    material: "Aluminio",
-    precio: 890000,
-    estado: "Entregado",
+    tipo: "rejas",
+    descripcion: "Baranda de balcón 3.00m x 1.10m",
+    estado: "Atendida",
     fecha: "4 sep",
   },
   {
     id: "SA-1028",
     cliente: "Taller Mecánico Don Julio",
     telefono: "320 118 4467",
-    trabajo: "Ventana corrediza 1.50m x 1.20m",
-    material: "Aluminio",
-    precio: 620000,
-    estado: "Entregado",
+    tipo: "ventanas",
+    descripcion: "Ventana corrediza 1.50m x 1.20m",
+    estado: "Atendida",
     fecha: "1 sep",
   },
 ];
 
 let consecutivo = 1043;
 
-export function agregarSolicitud(s: Omit<Solicitud, "id" | "estado" | "fecha">) {
+export function agregarSolicitud(
+  s: Pick<Solicitud, "cliente" | "telefono" | "tipo" | "descripcion">,
+) {
   const nueva: Solicitud = {
     ...s,
     id: `SA-${consecutivo++}`,
