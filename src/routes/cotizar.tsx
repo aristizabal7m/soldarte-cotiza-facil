@@ -112,7 +112,7 @@ function Cotizador() {
               id="descripcion"
               rows={4}
               className={inputCls}
-              placeholder="Ej: Reja para ventana 1.20m x 0.80m, diseño clásico, color negro"
+              placeholder="Ej: Reja para ventana de la sala, diseño clásico, color negro"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
             />
