@@ -51,7 +51,15 @@ function Panel() {
     setLista((prev) => prev.map((x) => (x.id === id ? { ...x, estado } : x)));
   };
 
-  const visibles = filtro === "Todas" ? lista : lista.filter((s) => s.estado === filtro);
+  const visibles =
+    filtro === "Todas"
+      ? [...lista].sort((a, b) => {
+          if (a.estado === "Pendiente" && b.estado !== "Pendiente") return -1;
+          if (a.estado !== "Pendiente" && b.estado === "Pendiente") return 1;
+          return 0;
+        })
+      : lista.filter((s) => s.estado === filtro);
+
   const pendientes = lista.filter((s) => s.estado === "Pendiente").length;
 
   return (
