@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import {
-  solicitudes as data,
   tiposTrabajo,
   type Estado,
   type Solicitud,
@@ -41,14 +41,62 @@ const bordeEstado: Record<Estado, string> = {
 const nombreTipo = (id: Solicitud["tipo"]) =>
   tiposTrabajo.find((t) => t.id === id)?.nombre ?? id;
 
+function formatearFecha(isoString: string): string {
+  if (!isoString) return "";
+  const fecha = new Date(isoString);
+  return fecha.toLocaleDateString("es-CO", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
 function Panel() {
-  const [lista, setLista] = useState<Solicitud[]>([...data]);
+  const [lista, setLista] = useState<Solicitud[]>([]);
+  const [cargando, setCargando] = useState(true);
   const [filtro, setFiltro] = useState<Estado | "Todas">("Todas");
 
-  const cambiar = (id: string, estado: Estado) => {
-    const s = data.find((x) => x.id === id);
-    if (s) s.estado = estado;
-    setLista((prev) => prev.map((x) => (x.id === id ? { ...x, estado } : x)));
+  const cargarSolicitudes = async () => {
+    setCargando(true);
+    const { data, error } = await supabase
+      .from("solicitudes_cotizacion")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error al cargar solicitudes:", error);
+    } else if (data) {
+      const traducidas: Solicitud[] = data.map((item) => ({
+        id: item.id,
+        tipo: item.tipo_construccion,
+        descripcion: item.descripcion,
+        cliente: item.cliente_nombre,
+        telefono: item.cliente_telefono,
+        estado: item.estado as Estado,
+        fecha: formatearFecha(item.created_at),
+      }));
+      setLista(traducidas);
+    }
+    setCargando(false);
+  };
+
+  useEffect(() => {
+    cargarSolicitudes();
+  }, []);
+
+  const cambiar = async (id: string, nuevoEstado: Estado) => {
+    setLista((prev) =>
+      prev.map((x) => (x.id === id ? { ...x, estado: nuevoEstado } : x))
+    );
+
+    const { error } = await supabase
+      .from("solicitudes_cotizacion")
+      .update({ estado: nuevoEstado })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error al actualizar estado:", error);
+      cargarSolicitudes();
+    }
   };
 
   const visibles =
@@ -110,51 +158,61 @@ function Panel() {
             </tr>
           </thead>
           <tbody>
-            {visibles.map((s) => (
-              <tr
-                key={s.id}
-                className={`border-t border-border border-l-4 ${bordeEstado[s.estado]} bg-card align-top`}
-              >
-                <td className="px-3 py-3 whitespace-nowrap text-xs text-muted-foreground">
-                  <span className="font-bold tracking-widest uppercase text-foreground">{s.id}</span>
-                  <br />
-                  {s.fecha}
-                </td>
-                <td className="px-3 py-3 font-display font-bold tracking-wide uppercase">
-                  {nombreTipo(s.tipo)}
-                </td>
-                <td className="px-3 py-3">{s.descripcion}</td>
-                <td className="px-3 py-3">
-                  <span className="font-display font-bold tracking-wide uppercase">
-                    {s.cliente}
-                  </span>
-                  <br />
-                  <span className="text-xs text-muted-foreground">{s.telefono}</span>
-                </td>
-                <td className="px-3 py-3">
-                  <span
-                    className={`inline-block border px-2 py-1 text-xs font-bold tracking-widest whitespace-nowrap uppercase ${colorEstado[s.estado]}`}
-                  >
-                    {s.estado}
-                  </span>
-                </td>
-                <td className="px-3 py-3">
-                  <select
-                    aria-label={`Cambiar estado de ${s.id}`}
-                    className="w-full max-w-36 border border-border bg-input px-2 py-1.5 text-sm text-foreground outline-none focus:border-forge"
-                    value={s.estado}
-                    onChange={(e) => cambiar(s.id, e.target.value as Estado)}
-                  >
-                    {estados.map((e) => (
-                      <option key={e} value={e}>
-                        {e}
-                      </option>
-                    ))}
-                  </select>
+            {cargando ? (
+              <tr>
+                <td colSpan={6} className="bg-card px-3 py-6 text-center text-sm text-muted-foreground">
+                  Cargando solicitudes desde Supabase...
                 </td>
               </tr>
-            ))}
-            {visibles.length === 0 && (
+            ) : (
+              visibles.map((s) => (
+                <tr
+                  key={s.id}
+                  className={`border-t border-border border-l-4 ${bordeEstado[s.estado]} bg-card align-top`}
+                >
+                  <td className="px-3 py-3 whitespace-nowrap text-xs text-muted-foreground">
+                    <span className="font-bold tracking-widest uppercase text-foreground">
+                      {s.id.substring(0, 8)}
+                    </span>
+                    <br />
+                    {s.fecha}
+                  </td>
+                  <td className="px-3 py-3 font-display font-bold tracking-wide uppercase">
+                    {nombreTipo(s.tipo)}
+                  </td>
+                  <td className="px-3 py-3">{s.descripcion}</td>
+                  <td className="px-3 py-3">
+                    <span className="font-display font-bold tracking-wide uppercase">
+                      {s.cliente}
+                    </span>
+                    <br />
+                    <span className="text-xs text-muted-foreground">{s.telefono}</span>
+                  </td>
+                  <td className="px-3 py-3">
+                    <span
+                      className={`inline-block border px-2 py-1 text-xs font-bold tracking-widest whitespace-nowrap uppercase ${colorEstado[s.estado]}`}
+                    >
+                      {s.estado}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3">
+                    <select
+                      aria-label={`Cambiar estado de ${s.id}`}
+                      className="w-full max-w-36 border border-border bg-input px-2 py-1.5 text-sm text-foreground outline-none focus:border-forge"
+                      value={s.estado}
+                      onChange={(e) => cambiar(s.id, e.target.value as Estado)}
+                    >
+                      {estados.map((e) => (
+                        <option key={e} value={e}>
+                          {e}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              ))
+            )}
+            {!cargando && visibles.length === 0 && (
               <tr>
                 <td colSpan={6} className="bg-card px-3 py-6 text-center text-sm text-muted-foreground">
                   No hay solicitudes en este estado.
