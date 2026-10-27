@@ -142,7 +142,7 @@ function ChatBot() {
   const [mensajes, setMensajes] = useState<ChatMessage[]>([
     {
       role: "model",
-      text: "¡Hola! Soy el asistente virtual de SoldArte. ¿En qué le puedo ayudar con herramientas, productos o cómo solicitar una cotización?",
+      text: "¡Hola! Soy el asistente virtual de SoldArte. ¿En qué le puedo ayudar con herramientas, materiales o solicitudes de cotización?",
     },
   ]);
 
@@ -162,17 +162,38 @@ function ChatBot() {
     setInput("");
     setCargando(true);
 
-    // Respuesta simulada para el Commit 1
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: nuevosMensajes }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.reply) {
+        setMensajes([...nuevosMensajes, { role: "model", text: data.reply }]);
+      } else {
+        setMensajes([
+          ...nuevosMensajes,
+          {
+            role: "model",
+            text: data.error || "Disculpe, ocurrió un problema al consultar con el taller.",
+          },
+        ]);
+      }
+    } catch (err) {
+      console.error("Error al enviar mensaje:", err);
       setMensajes([
         ...nuevosMensajes,
         {
           role: "model",
-          text: "Respuesta de prueba: La interfaz del asistente funciona correctamente. En el siguiente commit me conectaré con Gemini.",
+          text: "Lo sentimos, no hay conexión en este momento. Intente más tarde.",
         },
       ]);
+    } finally {
       setCargando(false);
-    }, 1000);
+    }
   };
 
   return (
