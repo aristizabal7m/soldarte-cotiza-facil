@@ -7,7 +7,8 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
+import { MessageSquare, X, Send, Sparkles, Bot, User } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -114,7 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <HeadContent />
       </head>
@@ -128,6 +129,146 @@ function RootShell({ children }: { children: ReactNode }) {
 
 const navCls =
   "border border-transparent px-3 py-2 text-xs font-bold tracking-widest uppercase text-muted-foreground hover:text-foreground";
+
+type ChatMessage = {
+  role: "user" | "model";
+  text: string;
+};
+
+function ChatBot() {
+  const [abierto, setAbierto] = useState(false);
+  const [input, setInput] = useState("");
+  const [cargando, setCargando] = useState(false);
+  const [mensajes, setMensajes] = useState<ChatMessage[]>([
+    {
+      role: "model",
+      text: "¡Hola! Soy el asistente virtual de SoldArte. ¿En qué le puedo ayudar con herramientas, productos o cómo solicitar una cotización?",
+    },
+  ]);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [mensajes, cargando]);
+
+  const enviarMensaje = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const texto = input.trim();
+    if (!texto || cargando) return;
+
+    const nuevosMensajes: ChatMessage[] = [...mensajes, { role: "user", text: texto }];
+    setMensajes(nuevosMensajes);
+    setInput("");
+    setCargando(true);
+
+    // Respuesta simulada para el Commit 1
+    setTimeout(() => {
+      setMensajes([
+        ...nuevosMensajes,
+        {
+          role: "model",
+          text: "Respuesta de prueba: La interfaz del asistente funciona correctamente. En el siguiente commit me conectaré con Gemini.",
+        },
+      ]);
+      setCargando(false);
+    }, 1000);
+  };
+
+  return (
+    <div className="fixed bottom-5 right-5 z-50">
+      {!abierto ? (
+        <button
+          onClick={() => setAbierto(true)}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-forge text-black shadow-lg shadow-forge/20 transition-transform hover:scale-105 active:scale-95"
+          aria-label="Abrir asistente virtual"
+        >
+          <Sparkles className="h-7 w-7" />
+        </button>
+      ) : (
+        <div className="flex h-[500px] w-[350px] sm:w-[380px] flex-col border border-border bg-card shadow-2xl">
+          {/* Encabezado */}
+          <div className="flex items-center justify-between border-b border-border bg-black/40 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="grid h-7 w-7 place-items-center bg-forge font-display text-xs font-bold text-black">
+                AI
+              </span>
+              <div>
+                <h3 className="font-display text-sm font-bold tracking-wide uppercase text-foreground">
+                  Asistente SoldArte
+                </h3>
+                <p className="text-[10px] text-muted-foreground">En línea · Taller de Pereira</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setAbierto(false)}
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Cerrar chat"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Lista de mensajes */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 text-sm">
+            {mensajes.map((m, idx) => (
+              <div
+                key={idx}
+                className={`flex gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                {m.role === "model" && (
+                  <div className="grid h-6 w-6 shrink-0 place-items-center rounded bg-forge/20 text-forge">
+                    <Bot className="h-3.5 w-3.5" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[80%] px-3 py-2 text-xs leading-relaxed ${
+                    m.role === "user"
+                      ? "bg-primary text-primary-foreground font-medium"
+                      : "border border-border bg-muted/50 text-foreground"
+                  }`}
+                >
+                  {m.text}
+                </div>
+                {m.role === "user" && (
+                  <div className="grid h-6 w-6 shrink-0 place-items-center rounded bg-primary/20 text-primary">
+                    <User className="h-3.5 w-3.5" />
+                  </div>
+                )}
+              </div>
+            ))}
+            {cargando && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Bot className="h-3.5 w-3.5 text-forge animate-pulse" />
+                <span>Escribiendo respuesta...</span>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Formulario de entrada */}
+          <form onSubmit={enviarMensaje} className="border-t border-border p-3 flex gap-2 bg-black/20">
+            <input
+              type="text"
+              maxLength={500}
+              placeholder="Escriba su consulta..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="flex-1 border border-border bg-input px-3 py-2 text-xs text-foreground outline-none focus:border-forge"
+            />
+            <button
+              type="submit"
+              disabled={cargando || !input.trim()}
+              className="bg-primary px-3 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -162,6 +303,9 @@ function RootComponent() {
       </header>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+
+      {/* Asistente Flotante de IA */}
+      <ChatBot />
     </QueryClientProvider>
   );
 }
