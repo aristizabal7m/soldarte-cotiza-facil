@@ -164,26 +164,51 @@ function ChatBot() {
     setCargando(true);
 
     try {
+<<<<<<< HEAD
       const resultado = await enviarMensajeChat({ data: { messages: nuevosMensajes } });
 
       if (resultado && resultado.reply) {
         setMensajes([...nuevosMensajes, { role: "model", text: resultado.reply }]);
+=======
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: nuevosMensajes }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.reply) {
+        setMensajes([...nuevosMensajes, { role: "model", text: data.reply }]);
+>>>>>>> 5871fb6
       } else {
         setMensajes([
           ...nuevosMensajes,
           {
             role: "model",
+<<<<<<< HEAD
             text: resultado?.error || "Disculpe, ocurrió un problema al consultar con el taller.",
+=======
+            text: data.error || "Disculpe, ocurrió un problema al consultar con el taller.",
+>>>>>>> 5871fb6
           },
         ]);
       }
     } catch (err) {
+<<<<<<< HEAD
       console.error("Error al ejecutar server function:", err);
+=======
+      console.error("Error al enviar mensaje:", err);
+>>>>>>> 5871fb6
       setMensajes([
         ...nuevosMensajes,
         {
           role: "model",
+<<<<<<< HEAD
           text: "Lo sentimos, no hay conexión con el servidor en este momento. Intente más tarde.",
+=======
+          text: "Lo sentimos, no hay conexión en este momento. Intente más tarde.",
+>>>>>>> 5871fb6
         },
       ]);
     } finally {
