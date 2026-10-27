@@ -12,6 +12,7 @@ import { MessageSquare, X, Send, Sparkles, Bot, User } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { enviarMensajeChat } from "@/lib/chat-server";
 
 function NotFoundComponent() {
   return (
@@ -142,7 +143,7 @@ function ChatBot() {
   const [mensajes, setMensajes] = useState<ChatMessage[]>([
     {
       role: "model",
-      text: "¡Hola! Soy el asistente virtual de SoldArte. ¿En qué le puedo ayudar con herramientas, productos o cómo solicitar una cotización?",
+      text: "¡Hola! Soy el asistente virtual de SoldArte. ¿En qué le puedo ayudar con herramientas, materiales o solicitudes de cotización?",
     },
   ]);
 
@@ -162,17 +163,32 @@ function ChatBot() {
     setInput("");
     setCargando(true);
 
-    // Respuesta simulada para el Commit 1
-    setTimeout(() => {
+    try {
+      const resultado = await enviarMensajeChat({ data: { messages: nuevosMensajes } });
+
+      if (resultado && resultado.reply) {
+        setMensajes([...nuevosMensajes, { role: "model", text: resultado.reply }]);
+      } else {
+        setMensajes([
+          ...nuevosMensajes,
+          {
+            role: "model",
+            text: resultado?.error || "Disculpe, ocurrió un problema al consultar con el taller.",
+          },
+        ]);
+      }
+    } catch (err) {
+      console.error("Error al ejecutar server function:", err);
       setMensajes([
         ...nuevosMensajes,
         {
           role: "model",
-          text: "Respuesta de prueba: La interfaz del asistente funciona correctamente. En el siguiente commit me conectaré con Gemini.",
+          text: "Lo sentimos, no hay conexión con el servidor en este momento. Intente más tarde.",
         },
       ]);
+    } finally {
       setCargando(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -301,10 +317,7 @@ function RootComponent() {
           </Link>
         </nav>
       </header>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-
-      {/* Asistente Flotante de IA */}
       <ChatBot />
     </QueryClientProvider>
   );
